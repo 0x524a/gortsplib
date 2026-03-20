@@ -63,8 +63,9 @@ func parsePort(value string) (int, error) {
 }
 
 func (s *SessionDescription) unmarshalProtocolVersion(value string) error {
-	if value != "0" {
-		return fmt.Errorf("invalid version")
+	v, err := strconv.Atoi(value)
+	if err != nil || v < 0 {
+		return fmt.Errorf("invalid version '%s'", value)
 	}
 
 	return nil

@@ -3263,6 +3263,14 @@ func TestMarshal(t *testing.T) {
 	}
 }
 
+func TestUnmarshalVersionOne(t *testing.T) {
+	sdpBody := "v=1\r\no=- 0 0 IN IP4 0.0.0.0\r\ns=\r\nt=0 0\r\n" +
+		"m=video 0 RTP/AVP 96\r\na=rtpmap:96 H264/90000\r\n"
+	var sd SessionDescription
+	err := sd.Unmarshal([]byte(sdpBody))
+	require.NoError(t, err)
+}
+
 func FuzzUnmarshal(f *testing.F) {
 	for _, c := range cases {
 		f.Add(string(c.enc))
