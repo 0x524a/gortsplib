@@ -46,7 +46,20 @@ func ParseURL(s string) (*URL, error) {
 
 // String implements fmt.Stringer.
 func (u *URL) String() string {
-	return (*url.URL)(u).String()
+	s := (*url.URL)(u).String()
+	if u.User == nil {
+		return s
+	}
+	// url.URL.String() over-encodes some valid sub-delimiters (e.g. !) in userinfo.
+	// Unescape only the userinfo segment to restore the original representation.
+	prefix := u.Scheme + "://"
+	rest := s[len(prefix):]
+	if at := strings.Index(rest, "@"); at >= 0 {
+		if decoded, err := url.PathUnescape(rest[:at]); err == nil {
+			return prefix + decoded + rest[at:]
+		}
+	}
+	return s
 }
 
 // Clone clones a URL.

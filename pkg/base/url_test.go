@@ -74,6 +74,12 @@ func TestURLParseErrors(t *testing.T) {
 	}
 }
 
+func TestURLStringUserinfoSpecialChars(t *testing.T) {
+	// ! is a valid sub-delimiter (RFC 3986 §3.2.1) and must not be percent-encoded.
+	u := mustParseURL("rtsp://rtspuser:CorpSec123$!@host:554/path")
+	require.Equal(t, "rtsp://rtspuser:CorpSec123$!@host:554/path", u.String())
+}
+
 func TestURLClone(t *testing.T) {
 	u := mustParseURL("rtsp://localhost:8554/test/stream")
 	u2 := u.Clone()
