@@ -50,14 +50,14 @@ func (u *URL) String() string {
 	if u.User == nil {
 		return s
 	}
-	// url.URL.String() over-encodes some valid sub-delimiters (e.g. !) in userinfo.
-	// Unescape only the userinfo segment to restore the original representation.
+	// url.URL.String() over-encodes the sub-delimiter '!' as %21 in userinfo.
+	// Only unescape '!' to preserve camera compatibility; all other percent-encoded
+	// characters (especially @, #, :, /) must remain encoded to avoid breaking
+	// URL re-parsing.
 	prefix := u.Scheme + "://"
 	rest := s[len(prefix):]
 	if at := strings.Index(rest, "@"); at >= 0 {
-		if decoded, err := url.PathUnescape(rest[:at]); err == nil {
-			return prefix + decoded + rest[at:]
-		}
+		return prefix + strings.ReplaceAll(rest[:at], "%21", "!") + rest[at:]
 	}
 	return s
 }

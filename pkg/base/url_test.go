@@ -80,6 +80,22 @@ func TestURLStringUserinfoSpecialChars(t *testing.T) {
 	require.Equal(t, "rtsp://rtspuser:CorpSec123$!@host:554/path", u.String())
 }
 
+func TestURLStringKeepsEncodedAtHashColon(t *testing.T) {
+	// Passwords with @, #, $ must remain percent-encoded in the URL string
+	// so that re-parsing the string does not break the URL structure.
+	u := mustParseURL("rtsp://service:Service.!%40%23%2434@192.168.1.153:8554/stream")
+	s := u.String()
+
+	// ! and $ are unescaped (valid sub-delimiters in userinfo)
+	// %40 (@), %23 (#) must stay encoded to avoid breaking re-parse
+	require.Equal(t, "rtsp://service:Service.!%40%23$34@192.168.1.153:8554/stream", s)
+
+	// The string must be re-parseable without error
+	u2, err := ParseURL(s)
+	require.NoError(t, err)
+	require.Equal(t, "192.168.1.153:8554", u2.Host)
+}
+
 func TestURLClone(t *testing.T) {
 	u := mustParseURL("rtsp://localhost:8554/test/stream")
 	u2 := u.Clone()
